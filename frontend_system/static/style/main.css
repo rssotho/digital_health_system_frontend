@@ -1,0 +1,106 @@
+/* Custom Styles */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+}
+
+.sidebar {
+    min-width: 250px;
+    background-color: #f8f9fa;
+    padding: 15px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+.footer {
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+}
+
+/* Custom CSS for Navbar */
+.navbar-nav .nav-link {
+    color: #333; /* Darker text color for visibility */
+    transition: color 0.3s, border-bottom 0.3s;
+    padding-bottom: 0.5rem; /* To create space for the underline */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: #28a745; /* Change text color on hover */
+    border-bottom: 2px solid #28a745; /* Green underline on hover */
+}
+
+.navbar-nav .nav-link.active {
+    color: #28a745; /* Change text color for active state */
+    border-bottom: 2px solid #28a745; /* Green underline for active state */
+}
+
+.navbar-nav .nav-link:focus {
+    outline: none; /* Remove the default focus outline */
+}
+
+/* main.css */
+
+/* Adjust the spacing between the navbar and the sidebar */
+.container-fluid.mt-3 {
+    margin-top: 3rem; /* Adjust this value as needed */
+}
+
+/* Style the sidebar */
+.sidebar {
+    background-color: #f8f9fa; /* Light background for sidebar */
+    border-right: 1px solid #dee2e6; /* Border for visual separation */
+}
+
+/* Card styling for the sidebar items */
+.card {
+    border: none;
+}
+
+.main-content {
+    display: flex;
+    margin-top: 20px;
+}
+.sidebar {
+    background-color: #fff; /* Ensure background is white */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    margin-right: 20px; /* Space between sidebar and content */
+}
+.content {
+    flex: 1;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    padding: 20px;
+}
+.footer {
+    background-color: #fff; /* White footer */
+    text-align: center;
+    padding: 10px 0;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 20px;
+}

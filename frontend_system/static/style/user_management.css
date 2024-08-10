@@ -1,0 +1,12 @@
+.modal-table td, .modal-table th {
+    vertical-align: middle;
+}
+.modal-content {
+    max-width: 90vw;
+}
+.btn-add-user {
+    margin: 20px 0;
+}
+.user-count {
+    font-weight: bold;
+}
