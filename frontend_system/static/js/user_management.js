@@ -71,79 +71,6 @@ $(document).ready(function() {
 });
 
 
-// Edit User
-
-$(document).ready(function() {
-    $('#editUserForm').on('submit', function(event) {
-        event.preventDefault();
-
-        var token = localStorage.getItem('token');
-        if (!token) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Authentication Error',
-                text: 'You must be logged in to add users.',
-                confirmButtonText: 'OK'
-            });
-            return;
-        }
-
-        var formData = {
-            first_name: $('#firstName').val() || null,
-            last_name: $('#lastName').val() || null,
-            email: $('#email').val() || null,
-            phone_number: $('#phoneNumber').val() || null,
-            role: $('#role').val() || null,
-        };
-
-        $.ajax({
-            url: "http://dmh.localhost:8001/auth/edit_user/",
-            type: "POST",
-            data: JSON.stringify(formData),
-            contentType: "application/json",
-            headers: {
-                // "X-CSRFToken": $('[name=csrfmiddlewaretoken]').val(),
-                "Authorization": "Token " + token
-            },
-            success: function(response) {
-                if (response.status === 'Success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: response.message,
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        $('#addUserForm')[0].reset();  // Reset the form
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message,
-                        confirmButtonText: 'OK'
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                let errorMessage = 'An unexpected error occurred. Please try again.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                }
-                if (xhr.status === 403) {
-                    errorMessage = 'You are not authorized to add users.';
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorMessage,
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
-    });
-});
-
-
 // Getting the users
 
 $(document).ready(function() {
@@ -170,7 +97,6 @@ $(document).ready(function() {
         button.textContent = text;
         button.className = className;
 
-      
         if (userId) {
             button.setAttribute('data-user-id', userId); // Set data-user-id attribute
         }
@@ -200,7 +126,7 @@ $(document).ready(function() {
                         row.appendChild(createCell(user.last_login || '-'));
                         
                         let actionCell = document.createElement('td');
-                        let editButton = createButton('Edit', 'btn btn-warning btn-sm ');
+                        let editButton = createButton('Edit', 'btn btn-warning btn-sm', user.id);
                         let deactivateButton = createButton('Deactivate', 'btn btn-danger btn-sm', user.id);
                         let activateButton = createButton('Activate', 'btn btn-success btn-sm ss', user.id);
                         
@@ -208,11 +134,17 @@ $(document).ready(function() {
                         editButton.addEventListener('click', function() {
                             populateEditForm(user);
                             $('#editUserModal').modal('show');
+                            $('#editUserForm').data('user-id', user.id);
                         });
 
                         deactivateButton.addEventListener('click', function(){
-                            const userId = this.getAttribute('data-user-id'); // Retrieve user ID
+                            const userId = this.getAttribute('data-user-id'); // Retrieve user 
                             deactivateUser(userId);
+                        });
+
+                        activateButton.addEventListener('click', function(){
+                            const userId = this.getAttribute('data-user-id'); // Retrieve user 
+                            activateUser(userId);
                         });
 
                         actionCell.appendChild(editButton);
@@ -252,25 +184,104 @@ $(document).ready(function() {
         document.getElementById('role').value = user.role;
     }
 
+    // Handle the form submission inside the modal
+    $('#editUserForm').on('submit', function(event) {
+        event.preventDefault();
+        const userId = $(this).data('user-id');
+        editUser(userId);
+    });
+
     loadUsers();
-
-            // Handle button clicks for activation and deactivation
-            $('#user-table').on('click', '.ss, .activate-btn', function() {
-                const userId = $(this).data('user-id'); // Using jQuery
-                console.log('Button clicked. User ID:', userId); // Debugging line
-
-                if ($(this).hasClass('deactivate-btn')) {
-                    deactivateUser(userId);
-                } else if ($(this).hasClass('activate-btn')) {
-                    activateUser(userId);
-                }
-            });
 });
 
 
-// Activate the user
+// Edit the user
+
+function editUser(userId) {
+
+    if (!userId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Invalid user ID. Cannot edit user.',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Authentication Error',
+            text: 'You must be logged in to edit users.',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    var formData = {
+        first_name: $('#editFirstName').val() || null,
+        last_name: $('#editLastName').val() || null,
+        email: $('#editEmail').val() || null,
+        phone_number: $('#editPhone').val() || null,
+        role: $('#editRole').val() || null,
+    };
+    console.log(formData);
+
+
+    $.ajax({
+        url: `http://dmh.localhost:8001/auth/edit_added_user/${userId}/`,
+        type: "POST",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        headers: {
+            "Authorization": "Token " + token
+        },
+        success: function(response) {
+            console.log(response);
+            if (response.status === 'Success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    $('#editUserForm')[0].reset();  // Reset the form
+                    $('#editUserModal').modal('hide');
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message,
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            let errorMessage = 'An unexpected error occurred. Please try again.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+            }
+            if (xhr.status === 403) {
+                errorMessage = 'You are not authorized to edit users.';
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+}
+
+
+// Deactivate the user
+
 function deactivateUser(userId) {
-    console.log('Deactivate user called with userId:', userId);
 
     if (!userId) {
         Swal.fire({
@@ -309,7 +320,6 @@ function deactivateUser(userId) {
                     "Authorization": "Token " + token
                 },
                 success: function (data) {
-                    console.log('Deactivation response:', data);
                     if (data.status === 'Success') {
                         Swal.fire(
                             'Deactivated!',
@@ -326,11 +336,78 @@ function deactivateUser(userId) {
                     }
                 },
                 error: function (xhr) {
-                    console.log('Error response:', xhr.responseText);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
                         text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to deactivate user.',
+                    });
+                }
+            });
+        }
+    });
+}
+
+
+// Activate the user
+function activateUser(userId) {
+
+    if (!userId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Invalid user ID. Cannot activate user.',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Authentication Error',
+            text: 'You must be logged in to manage users.',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "By committing to this action the user will be activated from the system!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, activate!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `http://dmh.localhost:8001/auth/activate_user/${userId}/`,
+                type: 'POST',
+                headers: {
+                    "Authorization": "Token " + token
+                },
+                success: function (data) {
+                    if (data.status === 'Success') {
+                        Swal.fire(
+                            'Activated!',
+                            'User has been activated.',
+                            'success'
+                        );
+                        loadUsers(); // Refresh user list if needed
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to activate user.',
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to activate user.',
                     });
                 }
             });

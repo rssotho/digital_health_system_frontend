@@ -14,3 +14,6 @@ def home(request):
 
 def user_management(request):
     return render(request, 'sign_up/user_management.html')
+
+def profile(request):
+    return render(request, 'sign_up/profile.html')
